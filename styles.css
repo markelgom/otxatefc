@@ -313,8 +313,21 @@ body {
 
 .player-image {
     margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
 }
 
+/* Nueva regla para la foto del jugador */
+.player-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Mantener el ícono como fallback si es necesario */
 .player-image i {
     font-size: 4rem;
     color: var(--primary-color);
