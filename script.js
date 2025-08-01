@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-menu a');
+    const isMobile = window.innerWidth <= 768;
 
     // Toggle del menú móvil
     hamburger.addEventListener('click', function() {
@@ -52,37 +53,43 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Animaciones en scroll
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
+// Animaciones en scroll (desactivadas en móviles)
+const isMobile = window.innerWidth <= 768;
 
-const observer = new IntersectionObserver(function(entries) {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-        }
+if (!isMobile) {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Aplicar animaciones a elementos solo en desktop
+    document.addEventListener('DOMContentLoaded', function() {
+        const animatedElements = document.querySelectorAll(
+            '.stat-item, .player-card, .match-card, .news-card, .contact-info, .contact-form'
+        );
+        
+        animatedElements.forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
     });
-}, observerOptions);
+}
 
-// Aplicar animaciones a elementos
-document.addEventListener('DOMContentLoaded', function() {
-    const animatedElements = document.querySelectorAll(
-        '.stat-item, .player-card, .match-card, .news-card, .contact-info, .contact-form'
-    );
-    
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(30px)';
-        el.style.transition = 'all 0.6s ease-out';
-        observer.observe(el);
-    });
-});
-
-// Contador animado para estadísticas
+// Contador animado para estadísticas (solo en desktop)
 function animateCounters() {
+    if (window.innerWidth <= 768) return; // No animar en móviles
+    
     const counters = document.querySelectorAll('.stat-item h3');
     
     counters.forEach(counter => {
@@ -151,8 +158,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Efecto parallax ligero para el hero
+// Efecto parallax ligero para el hero (solo en desktop)
 window.addEventListener('scroll', function() {
+    if (window.innerWidth <= 768) return; // No aplicar parallax en móviles
+    
     const scrolled = window.pageYOffset;
     const heroBackground = document.querySelector('.hero-background');
     
@@ -162,11 +171,14 @@ window.addEventListener('scroll', function() {
     }
 });
 
-// Easter egg: Gol animation al hacer click en el logo
+// Easter egg: Gol animation al hacer click en el logo + Hero interactivity
 document.addEventListener('DOMContentLoaded', function() {
     const logo = document.querySelector('.logo');
+    const heroTitle = document.querySelector('.hero h1');
+    const heroContent = document.querySelector('.hero-content');
     let clickCount = 0;
     
+    // Logo click effect
     logo.addEventListener('click', function() {
         clickCount++;
         
@@ -208,6 +220,80 @@ document.addEventListener('DOMContentLoaded', function() {
             clickCount = 0;
         }
     });
+
+    // Efecto de typing en el subtítulo del hero
+    const heroSubtitle = document.querySelector('.hero p');
+    const originalText = heroSubtitle.textContent;
+    
+    function typeWriter(text, element, speed = 100) {
+        element.textContent = '';
+        let i = 0;
+        const timer = setInterval(() => {
+            if (i < text.length) {
+                element.textContent += text.charAt(i);
+                i++;
+            } else {
+                clearInterval(timer);
+            }
+        }, speed);
+    }
+
+    // Iniciar efecto de typing después de que aparezca el título
+    setTimeout(() => {
+        typeWriter(originalText, heroSubtitle, 80);
+    }, 1000);
+
+    // Crear partículas flotantes de fondo
+    function createFloatingParticles() {
+        const heroParticles = document.querySelector('.hero-particles');
+        if (!heroParticles) return;
+
+        const particles = ['⚽', '🏆', '⭐', '🥅'];
+        
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.innerHTML = particles[Math.floor(Math.random() * particles.length)];
+            particle.style.cssText = `
+                position: absolute;
+                font-size: ${Math.random() * 20 + 15}px;
+                opacity: ${Math.random() * 0.3 + 0.1};
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                animation: floatParticle${i} ${Math.random() * 10 + 15}s linear infinite;
+                pointer-events: none;
+            `;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes floatParticle${i} {
+                    0% {
+                        transform: translateY(100vh) rotate(0deg);
+                    }
+                    100% {
+                        transform: translateY(-100px) rotate(360deg);
+                    }
+                }
+            `;
+            
+            document.head.appendChild(style);
+            heroParticles.appendChild(particle);
+            
+            // Eliminar y recrear la partícula cuando termine la animación
+            setTimeout(() => {
+                if (heroParticles.contains(particle)) {
+                    heroParticles.removeChild(particle);
+                    document.head.removeChild(style);
+                }
+            }, (Math.random() * 10 + 15) * 1000);
+        }
+    }
+
+    // Iniciar partículas flotantes solo en desktop
+    if (window.innerWidth > 768) {
+        createFloatingParticles();
+        // Recrear partículas cada 20 segundos
+        setInterval(createFloatingParticles, 20000);
+    }
 });
 
 // Lazy loading para imágenes (si se añaden más adelante)
